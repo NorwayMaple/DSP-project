@@ -58,7 +58,25 @@ def generateNote(freq):
     # max value is 32767 for 16-bit
     samples = np.array(samples * 32767, 'int16')
     return samples.tostring()
-
+    
+def chorus(data, buffer_length = 441, num_instruments = 2): # Next step:  Figure out why we use ring buffers instead of just doing the delay by subtracting from the index in an iteraiton (see Chrome bookmark), and if I need multiple buffers or multiple locaitons on the same buffer to make the chorusing effect?  Which one is more efficient
+    # not sure what order of magnitude buffer_length should be
+    samples = np.fromstring(data, 'int16')
+    samples = (samples / 32767).astype('float32')
+    chorus = np.array([0]*samples.size, 'float32')
+    buffers = [deque([0]*((buffer_length * i // num_instruments-1)+1)) for i in range(1, num_instruments)]
+    for i in range(samples.size):
+        buf_vals = np.array(samples[i], 'float32')
+        for buf in buffers:
+            np.append(buf_vals, buf[0])
+            buf.append(samples[i])
+            buf.popleft()
+        chorus[i] = np.mean(buf_vals)
+    chorus = np.array(chorus * 32767, 'int16')
+    return chorus.tostring()
+    
+        
+    
 # play a wav file
 class NotePlayer:
     # constr
@@ -76,11 +94,6 @@ class NotePlayer:
             self.notes[fileName].play()
         except:
             print(fileName + ' not found!')
-    def playRandom(self):
-        """play a random note"""
-        index = random.randint(0, len(self.notes)-1)
-        note = list(self.notes.values())[index]
-        note.play()
 
 # main() function
 def main():
