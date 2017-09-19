@@ -59,19 +59,39 @@ def generateNote(freq):
     samples = np.array(samples * 32767, 'int16')
     return samples.tostring()
     
-def chorus(data, buffer_length = 441, num_instruments = 2): # Next step:  Figure out why we use ring buffers instead of just doing the delay by subtracting from the index in an iteraiton (see Chrome bookmark), and if I need multiple buffers or multiple locaitons on the same buffer to make the chorusing effect?  Which one is more efficient
+def generateLFO(length = 44100, rate = 44100, ave_delay = 40, lfo_range = 40, freq = 8):
+    LFO = np.array([0]*length, 'int16')
+    for i in range(length):
+        #y1=delay-range/2 y2=delay+range/2 x1=0 x2=(rate/freq)%i
+        #y2-y1=range x2-x1=(rate/freq)%i
+        #(y2-y1)/(x2-x1)=range*freq/rate
+        #(x-x1)=i%(rate/freq)
+        #(y2-y1)(x-x1)/(x2-x1)=range*freq*(i%(rate/freq))/rate
+        #((y2-y1)(x-x1)/(x2-x1))+y1 = (range*freq*(i%(rate/freq))/rate) + delay - range/2
+        LFO[i]=((lfo_range*freq*(i%(rate//freq))//rate)+ave_delay-(lfo_range//2))*rate//1000
+        #LFO[i]=(lfo_range*freq*(i%(rate//freq))//rate)+ave_delay-(lfo_range//2)*rate//1000
+        #LFO[i]=(lfo_range*freq*(i%(rate//freq)))+ave_delay*rate-(lfo_range*rate//2)//1000
+
+
+    return LFO
+    
+    
+def chorus(data, buffer_length = 1764, lfo = None):
     # not sure what order of magnitude buffer_length should be
     samples = np.fromstring(data, 'int16')
     samples = (samples / 32767).astype('float32')
     chorus = np.array([0]*samples.size, 'float32')
-    buffers = [deque([0]*((buffer_length * i // num_instruments-1)+1)) for i in range(1, num_instruments)]
+    buf = deque([0]*buffer_length)
+    if lfo is None:
+        lfo = generateLFO(length = samples.size, freq = 16)
     for i in range(samples.size):
-        buf_vals = np.array(samples[i], 'float32')
-        for buf in buffers:
-            np.append(buf_vals, buf[0])
-            buf.append(samples[i])
-            buf.popleft()
-        chorus[i] = np.mean(buf_vals)
+        buf.append(samples[i])
+        buf.popleft()
+        chorus[i] = samples[lfo[i]]
+#        chorus[i] = (buf[0] + samples[lfo[i]]) / 2
+    #    chorus[i] = samples[i]/2 + buf[0]/2
+     #   buf.append(samples[i])
+      #  buf.popleft()
     chorus = np.array(chorus * 32767, 'int16')
     return chorus.tostring()
     
