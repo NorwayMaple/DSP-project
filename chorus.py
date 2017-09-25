@@ -76,15 +76,22 @@ def generateLFO(length = 44100, rate = 44100, ave_delay = 40, lfo_range = 40, fr
     return LFO
     
     
-def chorus(data, buffer_length = 1764, lfo = None):
+def chorus(data, buffer_length = 1764, lfo = None, num_instruments = 8):
     # not sure what order of magnitude buffer_length should be
     samples = np.fromstring(data, 'int16')
     samples = (samples / 32767).astype('float32')
     chorus = np.array([0]*samples.size, 'float32')
-    buf = deque([0]*buffer_length)
+    #buf = deque([0]*buffer_length) Make this a numpy array of buffers
+    bufs = np.zeros(num_instruments, buffer_length)
     if lfo is None:
         lfo = generateLFO(length = samples.size, freq = 16)
+    lfo_init_pointer = np.random.randint(samples.size, size = num_instruments)
     for i in range(samples.size):
+        for j in range(num_instruments): #Should this be the outer loop?, also, could this be done in a vectorized way with numpy?
+            if i + lfo_init_pointer >= samples.size:
+                bufs[j, i] = samples[i - lfo[i + lfo_init_pointer - samples.size]
+            else:
+                bufs[j, i] = samples[i - lfo[i + lfo_init_pointer]]
         buf.append(samples[i])
         buf.popleft()
         chorus[i] = samples[lfo[i]]
