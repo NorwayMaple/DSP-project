@@ -68,7 +68,7 @@ def generateLFO(length = 44100, rate = 44100, ave_delay = 40, lfo_range = 40, fr
         #(x-x1)=i%(rate/freq)
         #(y2-y1)(x-x1)/(x2-x1)=range*freq*(i%(rate/freq))/rate
         #((y2-y1)(x-x1)/(x2-x1))+y1 = (range*freq*(i%(rate/freq))/rate) + delay - range/2
-        LFO[i]=((lfo_range*freq*(i%(rate//freq))//rate)+ave_delay-(lfo_range//2))*rate//1000
+        LFO[i]=((lfo_range*freq*(i%(rate//freq))//rate)+ave_delay-(lfo_range//2))*rate//1000000
         #LFO[i]=(lfo_range*freq*(i%(rate//freq))//rate)+ave_delay-(lfo_range//2)*rate//1000
         #LFO[i]=(lfo_range*freq*(i%(rate//freq)))+ave_delay*rate-(lfo_range*rate//2)//1000
 
@@ -76,32 +76,41 @@ def generateLFO(length = 44100, rate = 44100, ave_delay = 40, lfo_range = 40, fr
     return LFO
     
     
-def chorus(data, buffer_length = 1764, lfo = None, num_instruments = 8):
-    # not sure what order of magnitude buffer_length should be
+def chorus(data, buffer_length = 1764, lfo = None, num_instruments = 8, ave_delay = 600, lfo_range = 600, freq = 16):
+# The buffer has to be big enough to fit the max delay
     samples = np.fromstring(data, 'int16')
     samples = (samples / 32767).astype('float32')
     chorus = np.array([0]*samples.size, 'float32')
+    #Mad the below and ndarray of buffers
     #buf = deque([0]*buffer_length) Make this a numpy array of buffers
-    bufs = np.zeros(num_instruments, buffer_length)
+    bufs = np.zeros((num_instruments, buffer_length))
     if lfo is None:
-        lfo = generateLFO(length = samples.size, freq = 16)
-    lfo_init_pointer = np.random.randint(samples.size, size = num_instruments)
+        lfo = generateLFO(length = samples.size, freq = freq, ave_delay = ave_delay, lfo_range = lfo_range )
+    lfo_init_pointers = np.random.randint(samples.size, size = num_instruments)
     for i in range(samples.size):
-        for j in range(num_instruments): #Should this be the outer loop?, also, could this be done in a vectorized way with numpy?
-            if i + lfo_init_pointer >= samples.size:
-                bufs[j, i] = samples[i - lfo[i + lfo_init_pointer - samples.size]
-            else:
-                bufs[j, i] = samples[i - lfo[i + lfo_init_pointer]]
-        buf.append(samples[i])
-        buf.popleft()
-        chorus[i] = samples[lfo[i]]
+        buffer_wrap = i + lfo_init_pointers >= samples.size
+        # this is how you'd do it in R
+        bufs[:, i % buffer_length] = samples[i - lfo[i + lfo_init_pointers - buffer_wrap * samples.size]] # This is wrong, it doesnt use var lfo
+        #The following was vectorized above
+        #for j in range(num_instruments): #Should this be the outer loop?, also, could this be done in a vectorized way with numpy?
+        #    if i + lfo_init_pointer >= samples.size:
+        #        bufs[j, i % buffer_length] = samples[i - lfo[i + lfo_init_pointer[j] - samples.size]]
+        #    else:
+        #        bufs[j, i % buffer_length] = samples[i - lfo[i + lfo_init_pointer]]
+        chorus[i] = bufs[:, i % buffer_length].sum() / num_instruments
 #        chorus[i] = (buf[0] + samples[lfo[i]]) / 2
     #    chorus[i] = samples[i]/2 + buf[0]/2
      #   buf.append(samples[i])
       #  buf.popleft()
+        if i > 4995 and i < 5000:
+            print('debug')
+            print(lfo[i + lfo_init_pointers - buffer_wrap * samples.size])
+            print(i - lfo[i + lfo_init_pointers - buffer_wrap * samples.size])
+            print(bufs[:, i % buffer_length])
+            print(bufs[0, i%buffer_length:(i+5)%buffer_length])
+            #You changed 1000 to 100000
     chorus = np.array(chorus * 32767, 'int16')
     return chorus.tostring()
-    
         
     
 # play a wav file
