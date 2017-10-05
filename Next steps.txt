@@ -1,6 +1,6 @@
 Next steps:
 
- Clean up code - streamline testing chorus function
+YOu have streamlines the testing of chorus function by separating chorus.py into three separate files, but you hvae not tested it, and need to create a function to open .wav files and perform the inverse of writeWave.  YOu are looking at how to use Python3’s bytes as opporsed to PYthon2’s strings to read data in.
 
  Test chorus on prerecorded sounds, first sustained waveforms like a guitar, then changing ones such as speech - maybe use matplotlib and/or scipy fft to troubleshoot
 
