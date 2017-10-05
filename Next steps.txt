@@ -1,0 +1,7 @@
+Next steps:
+
+ Clean up code - streamline testing chorus function
+
+ Test chorus on prerecorded sounds, first sustained waveforms like a guitar, then changing ones such as speech - maybe use matplotlib and/or scipy fft to troubleshoot
+
+ Change LFO parameters and algorithm as necessarys
