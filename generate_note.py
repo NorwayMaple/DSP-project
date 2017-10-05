@@ -1,4 +1,4 @@
-from write_wav import writeWave
+from write_wav import writeWAVE
 from collections import deque
 import random
 import numpy as np
@@ -24,12 +24,12 @@ def generateNote(freq):
     # samples to 16-bit to string
     # max value is 32767 for 16-bit
     samples = np.array(samples * 32767, 'int16')
-    return samples.tostring()
+    return samples.tobytes()
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Generating sounds with Karplus String Algorithm.")
     # add arguments
     parser.add_argument('--freq', default=440, type=int, required=False)
     args = parser.parse_args()   
-    data = generateNote(int(args.freq)) # YOu need argparser to get x
-    writeWave('note.wav', data)
+    data = generateNote(int(args.freq))
+    writeWAVE('note.wav', data)

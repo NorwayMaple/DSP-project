@@ -1,4 +1,7 @@
 # write out WAVE file
+
+import wave
+
 def writeWAVE(fname, data):
     # open file 
     file = wave.open(fname, 'wb')

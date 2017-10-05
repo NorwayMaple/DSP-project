@@ -61,7 +61,7 @@ def chorus(data, buffer_length = 1764, lfo = None, num_instruments = 8, ave_dela
             print(bufs[0, i%buffer_length:(i+5)%buffer_length])
             #You changed 1000 to 100000
     chorus = np.array(chorus * 32767, 'int16')
-    return chorus.tostring()
+    return chorus.tobytes()
         
     
 # play a wav file
@@ -81,10 +81,11 @@ class NotePlayer:
             self.sounds[fileName].play()
         except:
             print(fileName + ' not found!')
-
-# main() function - not used so far
-def main():
   
 # call main
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description="Generating sounds with Karplus String Algorithm.")
+    # add arguments
+    parser.add_argument('--file', default='note.wav', type=str, required=False)
+    args = parser.parse_args()
+    # You need to figure out how to read a .wav file as the inverse of the method in write_wav.py
