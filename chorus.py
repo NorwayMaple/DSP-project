@@ -2,7 +2,6 @@
 chorus.py
 """
 
-import sys, os
 import time, random 
 import wave, argparse, pygame 
 import numpy as np
@@ -11,10 +10,6 @@ from matplotlib import pyplot as plt
 
 # show plot of algorithm in action?
 gShowPlot = False
-
-# notes of a Pentatonic Minor scale
-# piano C4-E(b)-F-G-B(b)-C5
-pmNotes = {'C4': 262, 'Eb': 311, 'F': 349, 'G':391, 'Bb':466}
 
 # write out WAVE file
 def writeWAVE(fname, data):
@@ -31,7 +26,7 @@ def writeWAVE(fname, data):
     file.writeframes(data)
     file.close()
 
-# generate note of given frequency
+# generate note of given frequency using Karplus algorithm
 def generateNote(freq):
     nSamples = 44100
     sampleRate = 44100
@@ -120,75 +115,21 @@ class NotePlayer:
         pygame.mixer.pre_init(44100, -16, 1, 2048)
         pygame.init()
         # dictionary of notes
-        self.notes = {}
+        self.sounds = {}
     # add a note
     def add(self, fileName):
-        self.notes[fileName] = pygame.mixer.Sound(fileName)
+        self.sounds[fileName] = pygame.mixer.Sound(fileName)
     # play a note
     def play(self, fileName):
         try:
-            self.notes[fileName].play()
+            self.sounds[fileName].play()
         except:
             print(fileName + ' not found!')
 
-# main() function
+# main() function - not used so far
 def main():
     # declare global var
     global gShowPlot
-
-    parser = argparse.ArgumentParser(description="Generating sounds with Karplus String Algorithm.")
-    # add arguments
-    parser.add_argument('--display', action='store_true', required=False)
-    parser.add_argument('--play', action='store_true', required=False)
-    parser.add_argument('--piano', action='store_true', required=False)
-    args = parser.parse_args()
-
-    # show plot if flag set
-    if args.display:
-        gShowPlot = True
-        plt.ion()
-
-    # create note player
-    nplayer = NotePlayer()
-
-    print('creating notes...')
-    for name, freq in list(pmNotes.items()):
-        fileName = name + '.wav' 
-        if not os.path.exists(fileName) or args.display:
-            data = generateNote(freq) 
-            print('creating ' + fileName + '...')
-            writeWAVE(fileName, data) 
-        else:
-            print('fileName already created. skipping...')
-        
-        # add note to player
-        nplayer.add(name + '.wav')
-        
-        # play note if display flag set
-        if args.display:
-            nplayer.play(name + '.wav')
-            time.sleep(0.5)
-    
-    # play a random tune
-    if args.play:
-        while True:
-            try: 
-                nplayer.playRandom()
-                # rest - 1 to 8 beats
-                rest = np.random.choice([1, 2, 4, 8], 1, 
-                                        p=[0.15, 0.7, 0.1, 0.05])
-                time.sleep(0.25*rest[0])
-            except KeyboardInterrupt:
-                exit()
-
-    # random piano mode
-    if args.piano:
-        while True:
-            for event in pygame.event.get():
-                if (event.type == pygame.KEYUP):
-                    print("key pressed")
-                    nplayer.playRandom()
-                    time.sleep(0.5)
   
 # call main
 if __name__ == '__main__':
