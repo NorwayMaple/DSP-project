@@ -7,52 +7,8 @@ import wave, argparse, pygame
 import numpy as np
 from collections import deque
 from matplotlib import pyplot as plt
-
-# show plot of algorithm in action?
-gShowPlot = False
-
-# write out WAVE file
-def writeWAVE(fname, data):
-    # open file 
-    file = wave.open(fname, 'wb')
-    # WAV file parameters 
-    nChannels = 1
-    sampleWidth = 2
-    frameRate = 44100
-    nFrames = 44100
-    # set parameters
-    file.setparams((nChannels, sampleWidth, frameRate, nFrames,
-                    'NONE', 'noncompressed'))
-    file.writeframes(data)
-    file.close()
-
-# generate note of given frequency using Karplus algorithm
-def generateNote(freq):
-    nSamples = 44100
-    sampleRate = 44100
-    N = int(sampleRate/freq)
-    # initialize ring buffer
-    buf = deque([random.random() - 0.5 for i in range(N)])
-    # plot of flag set 
-    if gShowPlot:
-        axline, = plt.plot(buf)
-    # init sample buffer
-    samples = np.array([0]*nSamples, 'float32')
-    for i in range(nSamples):
-        samples[i] = buf[0]
-        avg = 0.995*0.5*(buf[0] + buf[1])
-        buf.append(avg)
-        buf.popleft()  
-        # plot of flag set 
-        if gShowPlot:
-            if i % 1000 == 0:
-                axline.set_ydata(buf)
-                plt.draw()
-      
-    # samples to 16-bit to string
-    # max value is 32767 for 16-bit
-    samples = np.array(samples * 32767, 'int16')
-    return samples.tostring()
+from write_wav import writeWave
+from generate_note import generateNote
     
 def generateLFO(length = 44100, rate = 44100, ave_delay = 40, lfo_range = 40, freq = 8):
     LFO = np.array([0]*length, 'int16')
@@ -128,8 +84,6 @@ class NotePlayer:
 
 # main() function - not used so far
 def main():
-    # declare global var
-    global gShowPlot
   
 # call main
 if __name__ == '__main__':
