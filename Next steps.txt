@@ -1,6 +1,6 @@
 Next steps:
 
-YOu have streamlines the testing of chorus function by separating chorus.py into three separate files, but you hvae not tested it, and need to create a function to open .wav files and perform the inverse of writeWave.  YOu are looking at how to use Python3’s bytes as opporsed to PYthon2’s strings to read data in.
+YOu have streamlines the testing of chorus function by separating chorus.py into three separate files, and upon testing it, you have found you need to adjust the frame rate for different .wav files as they are read.  So you have just rewriten the read and writeing of .wavs to be part of a WaveData class.  You must update chorus.py to reflect the objectification, and then test it again
 
  Test chorus on prerecorded sounds, first sustained waveforms like a guitar, then changing ones such as speech - maybe use matplotlib and/or scipy fft to troubleshoot
 

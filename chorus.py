@@ -7,7 +7,7 @@ import wave, argparse, pygame
 import numpy as np
 from collections import deque
 from matplotlib import pyplot as plt
-from write_wav import writeWave
+from wave_data import WaveData
 from generate_note import generateNote
     
 def generateLFO(length = 44100, rate = 44100, ave_delay = 40, lfo_range = 40, freq = 8):
@@ -27,8 +27,9 @@ def generateLFO(length = 44100, rate = 44100, ave_delay = 40, lfo_range = 40, fr
     return LFO
     
     
-def chorus(data, buffer_length = 1764, lfo = None, num_instruments = 8, ave_delay = 600, lfo_range = 600, freq = 16):
+def chorus(fname, buffer_length = 1764, lfo = None, num_instruments = 8, ave_delay = 600, lfo_range = 600, freq = 16):
 # The buffer has to be big enough to fit the max delay
+    data = readWAVE(fname)
     samples = np.fromstring(data, 'int16')
     samples = (samples / 32767).astype('float32')
     chorus = np.array([0]*samples.size, 'float32')
@@ -88,4 +89,6 @@ if __name__ == '__main__':
     # add arguments
     parser.add_argument('--file', default='note.wav', type=str, required=False)
     args = parser.parse_args()
-    # You need to figure out how to read a .wav file as the inverse of the method in write_wav.py
+    data = chorus(args.file)
+    new_file_name = '%s_chorus.wav' % args.file[:-4]
+    writeWAVE(new_file_name, data) #left off here
