@@ -27,9 +27,8 @@ def generateLFO(length = 44100, rate = 44100, ave_delay = 40, lfo_range = 40, fr
     return LFO
     
     
-def chorus(fname, buffer_length = 1764, lfo = None, num_instruments = 8, ave_delay = 600, lfo_range = 600, freq = 16):
+def chorus(data, buffer_length = 1764, lfo = None, num_instruments = 8, ave_delay = 600, lfo_range = 600, freq = 16): # also make into a class method?
 # The buffer has to be big enough to fit the max delay
-    data = readWAVE(fname)
     samples = np.fromstring(data, 'int16')
     samples = (samples / 32767).astype('float32')
     chorus = np.array([0]*samples.size, 'float32')
@@ -37,7 +36,7 @@ def chorus(fname, buffer_length = 1764, lfo = None, num_instruments = 8, ave_del
     #buf = deque([0]*buffer_length) Make this a numpy array of buffers
     bufs = np.zeros((num_instruments, buffer_length))
     if lfo is None:
-        lfo = generateLFO(length = samples.size, freq = freq, ave_delay = ave_delay, lfo_range = lfo_range )
+        lfo = generateLFO(length = samples.size, freq = freq, ave_delay = ave_delay, lfo_range = lfo_range)
     lfo_init_pointers = np.random.randint(samples.size, size = num_instruments)
     for i in range(samples.size):
         buffer_wrap = i + lfo_init_pointers >= samples.size
@@ -89,6 +88,6 @@ if __name__ == '__main__':
     # add arguments
     parser.add_argument('--file', default='note.wav', type=str, required=False)
     args = parser.parse_args()
-    data = chorus(args.file)
+    wave_data = WaveData(args.file)
     new_file_name = '%s_chorus.wav' % args.file[:-4]
-    writeWAVE(new_file_name, data) #left off here
+    wave_data.write(chorus(wave_data.data))
