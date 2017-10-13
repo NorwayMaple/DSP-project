@@ -1,6 +1,6 @@
 Next steps:
 
-YOu have streamlines the testing of chorus function by separating chorus.py into three separate files, and upon testing it, you have found you need to adjust the frame rate for different .wav files as they are read.  So you have just rewriten the read and writeing of .wavs to be part of a WaveData class.  You must update chorus.py to reflect the objectification, and then test it again.  Currnelty workingo n changing generate_note.py for the same reason
+YOu have streamlines the testing of chorus function by separating chorus.py into three separate files, and upon testing it, you have found you need to adjust the frame rate for different .wav files as they are read.  So you have just rewriten the read and writeing of .wavs to be part of a WaveData class.  You must update chorus.py to reflect the objectification, and then test it again.  Currnelty workingo n changing generate_note.py for the same reason.  Currnetly working on making chorus a class method for wave_data in order to give it access to the sample width of the data, thus using int8 or int16 for unpacking
 
  Test chorus on prerecorded sounds, first sustained waveforms like a guitar, then changing ones such as speech - maybe use matplotlib and/or scipy fft to troubleshoot
 

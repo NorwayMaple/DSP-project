@@ -32,5 +32,5 @@ if __name__ == '__main__':
     parser.add_argument('--freq', default=440, type=int, required=False)
     args = parser.parse_args()   
     wave_data = WaveData()
-    generateNote(int(args.freq), wave_data)
+    generateNote(wave_data, int(args.freq))
     wave_data.write('note.wav')
